@@ -1,0 +1,132 @@
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+#include <sstream>
+
+using namespace std;
+
+struct account{
+	int accountNum;
+	double rate, credit, bala, pay, purchases, a, monthlyRate, interest, newbal, availCredit;
+}accounts[7];
+
+//Declare function prototypes
+void printHeadings(ofstream &outfile);
+void read(ifstream &infile, int &accountNum, double &rate, double &credit, double &bala, double &pay);
+double readPurch(ifstream &infile, double &purchases, double &a);
+double findMonthly(double &rate);
+double findInterest(double &bala, double &pay, double monthlyRate, double &purchases);
+void printResult(ofstream &outfile, int &account, double &pay, double &purchases, double &interest, double &newbal, double &availCredit);
+
+
+int main()
+{
+	double b;
+		
+	// declare and open files
+	ifstream infile;
+	infile.open("Data.txt");
+	ofstream outfile;
+	outfile.open("Balance.out");
+
+	printHeadings(outfile);
+
+	
+	for (int n = 0; n <= 7; n++)
+	{
+		read(infile, accounts[n].accountNum, accounts[n].rate, accounts[n].credit, accounts[n].bala, accounts[n].pay);
+		accounts[n].purchases = readPurch(infile, accounts[n].purchases, accounts[n].a);
+
+		accounts[n]. monthlyRate = findMonthly(accounts[n].rate);
+
+		b = accounts[n].bala - accounts[n].pay;
+
+		if (b == 0)
+			accounts[n].interest = b*accounts[n].monthlyRate;
+		else
+			accounts[n].interest = findInterest(accounts[n].bala, accounts[n].pay, accounts[n].monthlyRate, accounts[n].purchases);
+
+		accounts[n].newbal = accounts[n].bala - accounts[n].pay + accounts[n].purchases + accounts[n].interest;
+
+		accounts[n].availCredit = accounts[n].credit - accounts[n].newbal;
+
+		printResult(outfile, accounts[n].accountNum, accounts[n].pay, accounts[n].purchases, accounts[n].interest, accounts[n].newbal, accounts[n].availCredit);
+
+	}
+
+	outfile.close();
+	infile.close();
+	return 0;
+}
+
+void printHeadings(ofstream &outfile)
+{
+	
+	//Print Banner
+	for(int x = 0; x <= 1; x++)
+	{
+		for (int y = 0; y <= 99; y++)
+		{
+			outfile << "*";
+			
+		}
+		outfile << endl;
+	}
+	outfile << setw(58) << "Credit Card Summary" << endl
+		<< setw(50) << "Elizabeth" << setw(8) << "Ralyea" << endl
+		<< setw(54) << "4-7-2015" << endl;
+
+	for (int z = 0; z <= 1; z++)
+	{
+		for (int r = 0; r <= 99; r++)
+		{
+			outfile << "*";
+
+		}
+		outfile << endl;
+	}
+
+	outfile << setw(10) << "Accout #" << setw(15) << "Payment" << setw(20) << "Purchases" << setw(15) << "Interest" << setw(15) << "New Balance" << setw(20) << "Avail. Credit" << endl;
+}
+
+void read(ifstream &infile, int &accountNum, double &rate, double &credit, double &bala, double &pay)
+{
+	infile >> accountNum >> rate >> credit >> bala >> pay;
+}
+
+double readPurch(ifstream &infile, double &purchases, double &a)
+{
+	purchases = 0;
+	while (!(a == 0.000067))
+	{
+		infile >> a;
+		purchases = purchases + a;
+	}
+		return purchases;
+}
+
+double findMonthly(double &rate)
+{
+	double monthlyRate;
+
+	monthlyRate = (rate/100) / 12;
+	
+	return monthlyRate;
+}
+
+double findInterest(double &bala, double &pay, double monthlyRate, double &purchases)
+{
+	double interest;
+
+	interest = (bala - pay  + purchases)*monthlyRate;
+
+	return interest;
+}
+void printResult(ofstream &outfile, int &accountNum, double &pay, double &purchases, double &interest, double &newbal, double &availCredit)
+{
+	outfile << setprecision(2) << fixed 
+		<< setw(10) << accountNum << setw(15) << pay
+		<< setw(20) << purchases << setw(15) << interest << setw(15) << newbal 
+		<< setw(20) << availCredit << endl;
+
+}
